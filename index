@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web実験システム / Web Experiment</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; background: #f9f9f9; color: #333; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .lang-switch { text-align: right; margin-bottom: 20px; }
+        .lang-btn { padding: 8px 16px; margin-left: 5px; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; }
+        .lang-btn.active { background: #007bff; color: white; border-color: #007bff; }
+        .hidden { display: none; }
+        h1 { border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .notice-box { background: #f0f7ff; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+        .btn-container { text-align: center; margin-top: 30px; }
+        .start-btn { padding: 12px 30px; font-size: 18px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; transition: 0.2s; }
+        .start-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .checkbox-container { margin: 20px 0; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="lang-switch">
+        <span>Language / 言語: </span>
+        <button id="btn-ja" class="lang-btn active" onclick="changeLanguage('ja')">日本語</button>
+        <button id="btn-en" class="lang-btn" onclick="changeLanguage('en')">English</button>
+    </div>
+
+    <div id="lang-ja" class="content-lang">
+        <h1>卒業研究用 Web実験システム</h1>
+        <p><strong>研究テーマ：ゲームBGMが時間知覚に与える影響</strong></p>
+        
+        <div class="notice-box">
+            <h3>【実験に関する説明と同意】</h3>
+            <p>本研究は、ゲームBGMが主観的時間感覚へ与える影響を調査することを目的としています。</p>
+            <p>動画視聴後、時間感覚および印象に関するアンケートへ回答していただきます。</p>
+            <ul>
+                <li>参加は完全に任意です。いつでもブラウザを閉じることで中断できます。</li>
+                <li>回答は匿名で収集され、卒業研究および学術目的のみに使用されます。</li>
+                <li>個人を特定できる情報（氏名、メールアドレスなど）は一切収集しません。</li>
+                <li>所要時間は約5〜10分です。</li>
+            </ul>
+        </div>
+        
+        <div class="checkbox-container">
+            <input type="checkbox" id="agree-ja" onchange="toggleSubmit()">
+            <label for="agree-ja">実験内容を理解し、参加に同意します。</label>
+        </div>
+    </div>
+
+    <div id="lang-en" class="content-lang hidden">
+        <h1>Web Experiment System</h1>
+        <p><strong>Research Topic: Effect of Video Game BGM on Time Perception</strong></p>
+        
+        <div class="notice-box">
+            <h3>【Information & Consent】</h3>
+            <p>This study investigates how video game background music affects subjective time perception.</p>
+            <p>After watching a short gameplay video, you will answer a brief questionnaire regarding perceived duration and impressions.</p>
+            <ul>
+                <li>Participation is completely voluntary. You may stop and close the browser at any time.</li>
+                <li>Responses are collected anonymously and used only for academic purposes.</li>
+                <li>No personally identifiable information (name, email, etc.) will be collected.</li>
+                <li>Estimated duration: 5–10 minutes.</li>
+            </ul>
+        </div>
+        
+        <div class="checkbox-container">
+            <input type="checkbox" id="agree-en" onchange="toggleSubmit()">
+            <label for="agree-en">I understand the description and agree to participate.</label>
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <button id="start-btn" class="start-btn" disabled onclick="startExperiment()">
+            <span class="text-ja">実験を開始する</span>
+            <span class="text-en hidden">Start Experiment</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'ja';
+
+    function changeLanguage(lang) {
+        currentLang = lang;
+        if(lang === 'ja') {
+            document.getElementById('lang-ja').classList.remove('hidden');
+            document.getElementById('lang-en').classList.add('hidden');
+            document.getElementById('btn-ja').classList.add('active');
+            document.getElementById('btn-en').classList.remove('active');
+            document.querySelectorAll('.text-ja').forEach(el => el.classList.remove('hidden'));
+            document.querySelectorAll('.text-en').forEach(el => el.classList.add('hidden'));
+        } else {
+            document.getElementById('lang-ja').classList.add('hidden');
+            document.getElementById('lang-en').classList.remove('hidden');
+            document.getElementById('btn-ja').classList.remove('active');
+            document.getElementById('btn-en').classList.add('active');
+            document.querySelectorAll('.text-ja').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.text-en').forEach(el => el.classList.remove('hidden'));
+        }
+        toggleSubmit();
+    }
+
+    function toggleSubmit() {
+        const checkbox = currentLang === 'ja' ? document.getElementById('agree-ja') : document.getElementById('agree-en');
+        document.getElementById('start-btn').disabled = !checkbox.checked;
+    }
+
+    function startExperiment() {
+        // 選択された言語情報を保存して次ページへ
+        localStorage.setItem('exp_lang', currentLang);
+        
+        // 【研究者向けメモ】ランダムに曲IDを割り振る処理（例: 1~4）を挟むと便利です
+        const musicId = Math.floor(Math.random() * 2) + 1; // 今回は仮に1か2
+        localStorage.setItem('exp_music_id', "music_" + musicId);
+        
+        window.location.href = 'player.html';
+    }
+</script>
+</body>
+</html>
