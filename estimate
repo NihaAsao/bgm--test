@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Estimation</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 4px; background: #f9f9f9; color: #333; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; text-align: center; }
+        .hidden { display: none; }
+        .question { font-size: 20px; font-weight: bold; margin-bottom: 30px; }
+        .slider-container { margin: 40px 0; position: relative; }
+        input[type="range"] { width: 100%; -webkit-appearance: none; background: #ddd; height: 8px; border-radius: 5px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: #007bff; border-radius: 50%; cursor: pointer; }
+        .slider-labels { display: flex; justify-content: space-between; margin-top: 10px; color: #666; font-weight: bold; }
+        .current-value { font-size: 24px; color: #007bff; font-weight: bold; margin-top: 15px; }
+        .next-btn { margin-top: 30px; padding: 12px 40px; font-size: 18px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="q-ja" class="question">
+        あなたはこの動画をどれくらいの長さに感じましたか？
+    </div>
+    <div id="q-en" class="question hidden">
+        How long did the video feel to you?
+    </div>
+
+    <div class="slider-container">
+        <input type="range" id="time-slider" min="0" max="600" value="300" oninput="updateDisplay(this.value)">
+        <div class="slider-labels">
+            <span>0:00</span>
+            <span>5:00</span>
+            <span>10:00</span>
+        </div>
+        <div id="value-display" class="current-value">5:00</div>
+    </div>
+
+    <button class="next-btn" onclick="submitEstimation()">
+        <span class="text-ja">アンケートに回答する (Google Forms)</span>
+        <span class="text-en hidden">Proceed to Questionnaire</span>
+    </button>
+</div>
+
+<script>
+    const lang = localStorage.getItem('exp_lang') || 'ja';
+    const musicId = localStorage.getItem('exp_music_id') || 'unknown';
+
+    // 言語切替
+    if(lang === 'en') {
+        document.getElementById('q-ja').classList.add('hidden');
+        document.getElementById('q-en').classList.remove('hidden');
+        document.querySelectorAll('.text-ja').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.text-en').forEach(el => el.classList.remove('hidden'));
+    }
+
+    // 秒数を「分:秒」形式に変換する関数
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = String(seconds % 60).padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    // スライダーの値が動いたときの表示更新
+    function updateDisplay(val) {
+        document.getElementById('value-display').innerText = formatTime(val);
+    }
+
+    // 回答送信（Googleフォームへの遷移）
+    function submitEstimation() {
+        const finalSeconds = document.getElementById('time-slider').value;
+        const formattedTime = formatTime(finalSeconds);
+
+        // ローカルストレージに主観時間を一時保存
+        localStorage.setItem('exp_slider_seconds', finalSeconds);
+        localStorage.setItem('exp_slider_formatted', formattedTime);
+
+        // ==========================================
+        // 【重要】Googleフォームの自動入力URLの設定
+        // ==========================================
+        // Googleフォームで「事前入力したURLを取得」を作成し、
+        // 以下の「entry.XXXXXX」部分を、実際のフォームのIDに書き換えてください。
+        
+        const googleFormBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLSfXXXXXXXXXXXXX/viewform"; 
+        
+        // entry.11111111 = 曲IDを入れる質問のID
+        // entry.22222222 = 主観時間（秒または分秒）を入れる質問のID
+        const musicEntryId = "entry.11111111"; 
+        const timeEntryId = "entry.22222222"; 
+
+        // プレフィル（自動入力）付きのURLを生成
+        const finalFormURL = `${googleFormBaseURL}?usp=pp_url&${musicEntryId}=${encodeURIComponent(musicId)}&${timeEntryId}=${encodeURIComponent(finalSeconds)}`;
+
+        // Googleフォームへリダイレクト
+        window.location.href = finalFormURL;
+    }
+</script>
+</body>
+</html>
